@@ -1,10 +1,15 @@
 //librerias
+require('dotenv').config()
 const express = require('express');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const Joi = require('joi');
+const path = require('path');
+const logRequest = require('./access.log');
 
 const app = express();
+const PORT = process.env.PORT || 4000;
+const APP_NAME = process.env.APP_NAME || 'My App';
 const txtName = './db/videojuegos.txt';
 const { readFile, writeFile } = require('./src/file_system.js');
 const joiValidacion = require('./Middleware/joiValidaciones.js');
@@ -12,45 +17,77 @@ const { registroSchema } = require('./schemas/Registro.js');
 
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.set('views', './src/views');
+app.set('view engine', 'ejs') 
+// aca le decimos que vamos a utilizar como motor de plantilla ejs
 
 // Listar videojuegos
 app.get('/videojuegos', (req, res) => {
-    const data = readFile(txtName);
-    res.json(data);
+    logRequest(req);
+    const filtro = req.query.filtro;
+    const videojuegos = readFile(txtName);
+
+    if (filtro) {
+        const videojuegosFiltrados = videojuegos.filter(videojuego => videojuego.Nombre.toLowerCase().includes(filtro.toLowerCase()));
+        res.render('videojuegos/index', { videojuegos: videojuegosFiltrados });
+    } else {
+        res.render('videojuegos/index', { videojuegos: videojuegos });
+    }
 });
+app.get('/videojuegos/create', (req,res) =>{
+    logRequest(req);
+    //Mostrar el formulario
+    res.render('videojuegos/create');
+})
 
 // Crear videojuego
-app.post('/videojuegos', joiValidacion(registroSchema), (req, res) => {
-    let { Nombre, Empresa, Tematica, Online, Jugadores, Fecha_Lanzamiento, Precio, Edad_Minima } = req.body;
+app.post('/videojuegos', (req, res) => {
+    logRequest(req);
+    try {
+        // Validación con Joi
+        const { error } = registroSchema.validate(req.body);
+        if (error) {
+            res.status(400).json({ "ok": false, "message": error.details[0].message });
+            return;
+        }
 
-    // Generar un nuevo ID para el videojuego
-    const id = uuidv4();
+        // Crear un nuevo videojuego
+        let { Nombre, Empresa, Tematica, Online, Jugadores, Fecha_Lanzamiento, Precio, Edad_Minima } = req.body;
 
-    // Crear un objeto de videojuego con el ID generado
-    let nuevoVideojuego = {
-        id,
-        Nombre,
-        Empresa,
-        Tematica,
-        Online,
-        Jugadores,
-        Fecha_Lanzamiento,
-        Precio,
-        Edad_Minima,
-    };
+        // Generar un nuevo ID para el videojuego
+        const id = uuidv4();
 
-    // Obtener la lista actual de videojuegos y agregar el nuevo videojuego
-    const videojuegos = readFile(txtName);
-    videojuegos.push(nuevoVideojuego);
+        // Crear un objeto de videojuego con el ID generado
+        let nuevoVideojuego = {
+            id,
+            Nombre,
+            Empresa,
+            Tematica,
+            Online,
+            Jugadores,
+            Fecha_Lanzamiento,
+            Precio,
+            Edad_Minima,
+        };
 
-    // Escribir la lista actualizada de videojuegos en el archivo
-    writeFile(txtName, videojuegos);
+        // Obtener la lista actual de videojuegos y agregar el nuevo videojuego
+        const videojuegos = readFile(txtName);
+        videojuegos.push(nuevoVideojuego);
 
-    res.json({ "ok": true, Videojuego: nuevoVideojuego });
+        // Escribir la lista actualizada de videojuegos en el archivo
+        writeFile(txtName, videojuegos);
+
+        // Redirigir al usuario a la lista de videojuegos
+        res.redirect('/videojuegos');
+    } catch (error) {
+        console.error(error);
+        res.json({ message: 'Error al almacenar el videojuego' });
+    }
 });
 
 // Obtener un videojuego por ID
 app.get('/videojuegos/:id', (req, res) => {
+    logRequest(req);
     const id = req.params.id;
     const videojuegos = readFile(txtName);
     const videojuegoEncontrado = videojuegos.find(videojuego => videojuego.id === id);
@@ -65,6 +102,7 @@ app.get('/videojuegos/:id', (req, res) => {
 
 // Actualizar un videojuego por ID
 app.put('/videojuegos/:id', joiValidacion(registroSchema), (req, res) => {
+    logRequest(req);
     const id = req.params.id;
     const videojuegos = readFile(txtName);
     const videojuegoIndex = videojuegos.findIndex(videojuego => videojuego.id === id);
@@ -85,6 +123,7 @@ app.put('/videojuegos/:id', joiValidacion(registroSchema), (req, res) => {
 
 // Borrar un videojuego por ID
 app.delete('/videojuegos/:id', (req, res) => {
+    logRequest(req);
     const id = req.params.id;
     const videojuegos = readFile(txtName);
     const videojuegoIndex = videojuegos.findIndex(videojuego => videojuego.id === id);
@@ -100,6 +139,9 @@ app.delete('/videojuegos/:id', (req, res) => {
     res.json({ "ok": true, message: "Videojuego eliminado exitosamente" });
 });
 
+
+
 app.listen(4000, () => {
-    console.log("API está corriendo en http://localhost:4000");
+    console.log(`${APP_NAME} está corriendo en http://localhost:${PORT}`);
 });
+

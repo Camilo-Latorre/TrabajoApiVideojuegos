@@ -1,0 +1,63 @@
+<%- include ('../layouts/header', {title: 'Agregar videojuego'}); -%>
+
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="alert alert-success text-center"> Agregar nuevo videojuego</h1>
+            </div>
+        </div>
+            <div class="row">
+            <div class="col-12">
+                <form action="/videojuegos" method="post" class="row">
+                    <div class="col-6">
+                        <label for="name" class="form-label">Nombre</label>
+                        <input type="text" name="Nombre" id="nombre" class="form-control" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="age" class="form-label">Empresa</label>
+                        <input type="text" name="Empresa" id="empresa" class="form-control" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="breed" class="form-label">Tematica</label>
+                        <input type="text" name="Tematica" id="tematica" class="form-control" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="precio" class="form-label">Precio</label>
+                        <input type="text" name="Precio" id="precio" class="form-control" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="fechaLanzamiento" class="form-label">Fecha de Lanzamiento</label>
+                        <input type="date" name="Fecha_Lanzamiento" id="fechaLanzamiento" class="form-control" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="edadMinima" class="form-label"> Edad minima</label>
+                        <input type="number" name="Edad_Minima" id="edad" class="form-control" required>
+                    </div>
+                    <div class="col-6">
+                        <label for="cantidadJugadores" class="form-label"> # Jugadores</label>
+                        <input type="text" name="Jugadores" id="jugadores" class="form-control" required>
+                    </div>
+                    <div class="col-6">
+                        
+                        <label for="type" class="form-label">Online</label>
+                        <select type="text" name="Online" id="online" class="form-select" required>
+                        <option value="true">Si </option>
+                        <option value="false"> No </option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 d-grid mt-4">
+                        <button type="submit" class="btn btn-outline-success">Agregar</button>
+                    </div>
+
+        </div>
+            <div class="row">
+                <div class="col-12 d-grid mt-4">
+                    <a href="/videojuegos" class="btn btn-outline-secondary">
+                        Regresar a la lista
+                        </a>
+         </div>
+    </div>
+    
+    <%- include ('../layouts/footer'); -%>

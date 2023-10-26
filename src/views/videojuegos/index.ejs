@@ -1,0 +1,91 @@
+<%- include ('../layouts/header', {title: 'Lista de videojuegos'}); -%>
+</div>
+<div class="container"> 
+    <div class="row">
+        <div class="col-12">
+            <h1 class="alert alert-succes text-center"> Lista de videojuegos</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 text-center">
+    
+            <form id="filterForm" action="/videojuegos" method="get">
+                <input type="text" id="nombreInput" name="filtro" placeholder="Buscar por nombre">
+                <button type="submit">Buscar</button>
+            </form>
+    
+        </div>
+        <script>
+          function generatePDF(videojuego) {
+              const data = JSON.parse(videojuego);
+      
+              const docDefinition = {
+                  content: [
+                      { text: 'Detalles del Registro', style: 'header' },
+                      { text: `ID: ${data.id}` },
+                      { text: `Nombre: ${data.Nombre}` },
+                      { text: `Empresa: ${data.Empresa}` },
+                      { text: `Tematica: ${data.Tematica}` },
+                      // Agrega más detalles aquí
+                  ],
+                  styles: {
+                      header: {
+                          fontSize: 18,
+                          bold: true,
+                      },
+                  },
+              };
+      
+              pdfmake.createPdf(docDefinition).download(); // Utiliza download() para descargar el PDF
+          }
+      </script>
+
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Nombre</th>
+                        <th scope="col">Empresa</th>
+                        <th scope="col">Precio</th>
+                        <th scope="col">Online</th>
+                        <th scope="col">Fecha de lanzamiento</th>
+                        <th scope="col">Edad minima</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% videojuegos.forEach(videojuego => { %>
+                        <tr>
+                            <th scope="row"><%= videojuego.id %></th>
+                            <td scope="col"><%= videojuego.Nombre %></th>
+                            <td scope="col"><%= videojuego.Empresa %></th>
+                            <td scope="col"><%= videojuego.Precio %></th>
+                            <td scope="col"><%= videojuego.Online %></th>
+                            <td scope="col"><%= videojuego.Fecha_Lanzamiento %></th>
+                            <td scope="col"><%= videojuego.Edad_Minima %></th>
+                            <td><form action="videojuegos/delete/<%= videojuego.id %>" method="post"
+                                    onsubmit="return confirm('Are you sure you want to delete this videojuego?');">
+                                    <button type="submit" class="btn btn-outline-danger">Borrar</button> 
+                                </form>
+                            </td>
+                            <td>
+                              <button onclick="generatePDF(<%- JSON.stringify(videojuego) %>)" class="btn btn-outline-primary">Descargar PDF</button>
+                          </td>
+                            
+
+                        </tr>
+                        
+                     <%}); %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12 d-grid">
+          <a href="/videojuegos/create" class="btn btn-outline-secondary">
+            Agregar videojuego
+          </a>
+    </div>
+</div>
+    <%- include ('../layouts/footer'); -%>
